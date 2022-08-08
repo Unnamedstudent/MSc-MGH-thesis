@@ -117,7 +117,7 @@ a<-0 #store sumNLL for each ratio
 getNLL<-function(parms){
   parms <- c(
     Mr=3.5,  #multiplication rate of R strain calculated from data
-    f=0.3193307,  #fitness cost 
+    f=0.2581026,  #fitness cost 
     delta_s1 = exp(parms[1]),#/h, drug clearance effect on S strain
     delta_r1 = exp(parms[2]),#/h, drug clearance effect on R strain
     x = exp(parms[3])/(1+exp(parms[3])), #% entering dormancy in S strain
