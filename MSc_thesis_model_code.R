@@ -8,6 +8,8 @@ library(readxl)
 
 
 # 1.Load data ####
+## absenece of drug data
+nodrug<-read_excel("C:/model/nodrugexpt.xlsx")
 ## 1 dose, different ratios
 Expt1 <-read_excel("C:/model/ratios.xlsx")
 ## 1 dose, different concs, fixed 50:50 ratio
@@ -22,10 +24,11 @@ growthmodel <- function(t,state,parms){
   with(as.list(c(state, parms)),{
     
     ##multiple doses
-    pulse = c(rep(c(rep(1, mdur), rep(0, (30-mdur))),rounds),
+    pulse = c(rep(c(rep(1, mdur), rep(0, (24-mdur))),rounds),
               rep(0, (rounds*70*24)))
     
-    delta_s = delta_r = 0;   #initially drug killing effect is zero
+    delta_s = delta_r = 0;  
+    #dose introduced within the first 3 days
     if(t<72){
       delta_s = approx(1:length(pulse),delta_s1*pulse,t, method="constant", rule=2)$y
       delta_r = approx(1:length(pulse),delta_r1*pulse,t, method="constant", rule=2)$y}
@@ -53,9 +56,10 @@ init_state <- c(S = 3*10^7*(1-ratio), Sd=0, R = 3*10^7*ratio, Rd=0)
 
 times <- seq(0, 70*24, by = 1) #in hours
 
-# 5. Estimating fitness cost from no drug data####
-nodrug_data<-c(43,52,35,41,36,36,21,32,16,23,13,4,0)
-
+# 4. Estimating fitness cost from no drug data####
+nodrug_data<-nodrug$`% Wildype`
+ratio<-0.5
+init_state <- c(S = 3*10^7*(1-ratio), Sd=0, R = 3*10^7*ratio, Rd=0)
 #calculate least square of %C580Y
 getssq<-function(parms){
   parms <- c(
@@ -80,6 +84,7 @@ getssq<-function(parms){
   perc_R<-perc_R[t_nodrug]
   
   ssq<-sum((perc_R-nodrug_data)^2)
+  
   return(ssq)
   
 }
@@ -107,7 +112,7 @@ perc_R <-perc_R[seq(24,length(perc_R),24)]
 t_nodrug<-c(1:11,14,17)
 perc_R<-perc_R[t_nodrug]
 #plot(perc_R)
-plot(t_nodrug,nodrug_data,type="p",pch=20, xlab="Time(Days)",ylab="%C580Y")
+plot(t_nodrug,nodrug_data,type="p",pch=20, main="%C580Y in absence of drug using estimated f" ,xlab="Time(Days)",ylab="%C580Y")
 lines(t_nodrug,perc_R,col="red")
 print(f_fit)
 # 5.Calculate NLL for growth model ####
